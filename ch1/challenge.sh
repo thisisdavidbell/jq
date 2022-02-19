@@ -47,13 +47,23 @@ jq -r '.artObjects[] | select(.principalOrFirstMaker | test("van")) | [ .princip
 jq -r '.artObjects[] | select(.principalOrFirstMaker | test("van")) | [ .principalOrFirstMaker, .id, .webImage.url ] | @csv ' jq_rkm.json
 
 echo
-echo 3
+echo 3 - jq_twitter.json
 # Challenge 3
-# 3a: One row per tweet, with multiple hashtags in the same cell
-# 3b: One row per hashtag/tweet combination
+# remove text fields as could be anything:
+# jq '.text = "" | .retweeted_status.text = ""' jq_twitter.json > out && mv out jq_twitter.json
+
+# 3a: One row per tweet, with multiple hashtags in the same cell, into csv
+# 3b: One row per hashtag/tweet combination, into csv
 #     = object with id text field, and hashtags array
 jq -r '{ id: .id, hashtags: .entities.hashtags[].text }' jq_twitter.json
-# accidentally solved 3b above :point-up:
+# accidentally solved 3b above :point-up:, so finish it off into csv
+jq -r '[ .id, .entities.hashtags[].text ]' jq_twitter.json
+# note -  this leaves in all entries which have no hashtag - there is no explode, in the array entry it just has flat id plus all hashtag texts, even if zero hastag texts
+
+jq -r '{ id: .id, hashtags: .entities.hashtags[].text } | [ .id, .hashtags ] | @csv' jq_twitter.json
+# note - this only has entries with hashtags - it explodes the hashtags entries, but the explode doesnt happen where hashtags empty, and actually these entries are not passed on (its removed)
+
+# 3a
 jq -r '{id: .id, hashtags: [ .entities.hashtags[].text ]}' jq_twitter.json
 # remove empty hashtags
 jq -r ' select(.entities.hashtags | length > 0 ) | {id: .id, hashtags: [ .entities.hashtags[].text ]}' jq_twitter.json
@@ -62,3 +72,9 @@ jq -r ' select(.entities.hashtags | length > 0 ) | {id: .id, hashtags: [ .entiti
 # convert to csv
 #  = convert array to ; separated string, and remove objects
 jq -r ' select(.entities.hashtags | length > 0 ) | {id: .id, hashtags: [ .entities.hashtags[].text ]|unique | join(";")} | [ .id, .hashtags ] | @csv' jq_twitter.json
+
+echo
+echo 4
+
+# 4
+# Next: Grouping and Counting 

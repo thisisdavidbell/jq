@@ -6,4 +6,4 @@ Following tutorial here as refresher:
 - https://programminghistorian.org/en/lessons/json-and-jq#one-row-per-tweet
 
 
-See [challenge.sh](challenges.sh) for examples and challenges.
+See [challenge.sh](challenge.sh) for examples and challenges.

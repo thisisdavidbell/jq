@@ -1,6 +1,9 @@
 # jq
 Playground for jq
 
+## Doc:
+
+- 1.6 doc: https://stedolan.github.io/jq/manual/v1.6/
 
 ## Ch1
 

@@ -1,5 +1,11 @@
 # #!/bin/bash
 
+function title () {
+  echo ""
+  echo "Challenge $1"
+  echo "============"
+  echo ""
+}
 
 # # Equivalent:
 # # cat jq_rkm.json | jq -r < jq_rkm.json
@@ -16,8 +22,7 @@
 # # in object
 # jq -r '.artObjects | map( { id : .id })' jq_rkm.json
 
-# echo
-# echo 1
+# title 1
 
 # # Challenge 1
 # # Let’s filter the Rijksmuseum JSON to only return the ids of objects that have at least one value assigned to their productionPlaces:
@@ -26,8 +31,7 @@
 # # remove from array
 # jq -r '.artObjects[] | select(.productionPlaces | length >= 1) | .id ' jq_rkm.json
 
-# echo
-# echo 2
+# title 2
 
 # # Challenge 2a
 # # let’s select only those objects whose primary maker has the particle “van” in their name, and return the artist name and artwork id.
@@ -35,9 +39,7 @@
 # # put into objects
 # jq -r '.artObjects[] | select(.principalOrFirstMaker | test("van")) | { artist: .principalOrFirstMaker, id: .id }' jq_rkm.json
 
-# echo
-# echo 2b
-# # Challenge 2b
+# title 2b
 # # let’s add the web image url for each artwork as well
 # jq -r '.artObjects[] | select(.principalOrFirstMaker | test("van")) | { artist: .principalOrFirstMaker, id: .id, "imageurl" : .webImage.url }' jq_rkm.json
 # # and output as csv (note csv needs to be an array of text entries)
@@ -46,9 +48,7 @@
 # # convert to csv
 # jq -r '.artObjects[] | select(.principalOrFirstMaker | test("van")) | [ .principalOrFirstMaker, .id, .webImage.url ] | @csv ' jq_rkm.json
 
-# echo
-# echo 3 - jq_twitter.json
-# # Challenge 3
+# title 3
 # # blank out text fields as could be anything (Note this processing pretty printed file, but no other meaningful changes):
 # # jq '.text = "" | .retweeted_status.text = ""' jq_twitter.json > out && mv out jq_twitter.json
 
@@ -63,7 +63,7 @@
 # jq -r '{ id: .id, hashtags: .entities.hashtags[].text } | [ .id, .hashtags ] | @csv' jq_twitter.json
 # # note - this only has entries with hashtags - it explodes the hashtags entries, but the explode doesnt happen where hashtags empty, and actually these entries are not passed on (its removed)
 
-# # 3a
+# # Challenge 3a
 # jq -r '{id: .id, hashtags: [ .entities.hashtags[].text ]}' jq_twitter.json
 # # remove empty hashtags
 # jq -r ' select(.entities.hashtags | length > 0 ) | {id: .id, hashtags: [ .entities.hashtags[].text ]}' jq_twitter.json
@@ -73,8 +73,7 @@
 # #  = convert array to ; separated string, and remove objects
 # jq -r ' select(.entities.hashtags | length > 0 ) | {id: .id, hashtags: [ .entities.hashtags[].text ]|unique | join(";")} | [ .id, .hashtags ] | @csv' jq_twitter.json
 
-# echo
-# echo 4
+# title 4
 
 # # 4
 # # Next: Grouping
@@ -101,7 +100,15 @@
 # jq -s 'group_by(.user) | map( [.[0].user.id, .[0].user.screen_name, .[0].user.followers_count, ([ .[].id ] | join(";")) ])'  jq_twitter.json
 # # convert to csv
 # #  - note we need to add in the -r as well as -s, in order to remove the quotes
-jq -sr 'group_by(.user) | .[] | [ .[0].user.id, .[0].user.screen_name, .[0].user.followers_count, ([ .[].id ] | join(";")) ] | @csv'  jq_twitter.json
+# jq -sr 'group_by(.user) | .[] | [ .[0].user.id, .[0].user.screen_name, .[0].user.followers_count, ([ .[].id ] | join(";")) ] | @csv'  jq_twitter.json
+
+title 5
 
 # 5 Counting
-#Next
+# we will use jq to count the number of times unique hashtags appear in this dataset
+# count all hashtags to start with
+# jq -s 'map(.entities.hashtags[].text) | unique | length' jq_twitter.json
+# count occurance of each hashtag 
+jq  -sr 'map( { hashtag: .entities.hashtags[].text }) | group_by(.hashtag) | .[] | { hashtag: .[0].hashtag, count: length } ' jq_twitter.json
+# question asks for csv again...
+jq  -sr 'map( { hashtag: .entities.hashtags[].text }) | group_by(.hashtag) | .[] | [ .[0].hashtag, length ] | @csv ' jq_twitter.json

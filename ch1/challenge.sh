@@ -112,3 +112,17 @@ title 5
 jq  -sr 'map( { hashtag: .entities.hashtags[].text }) | group_by(.hashtag) | .[] | { hashtag: .[0].hashtag, count: length } ' jq_twitter.json
 # question asks for csv again...
 jq  -sr 'map( { hashtag: .entities.hashtags[].text }) | group_by(.hashtag) | .[] | [ .[0].hashtag, length ] | @csv ' jq_twitter.json
+
+title 6
+
+# First of the "Challenges" 
+# add to the hashtag-counting filter to only count hashtags when their tweet has been retweeted at least 200 times.
+#   Hint: the retweet count is saved under the key retweet_count
+jq  -sr 'map(select(.retweet_count >= 200)) | map( { hashtag: .entities.hashtags[].text, aretweet_count: .retweet_count }) | group_by(.hashtag) | .[] | { hashtag: .[0].hashtag, count: length, bretweet_count: .[0].aretweet_count } ' jq_twitter.json
+
+title 7
+# try to compute the total number of times each user has had their tweets (at least within this dataset) retweeted
+# plan:
+#   - group_by users
+#   - sum(?) retweet_count
+jq -s 'group_by(.user) | map({ user_id: .[0].user.id, total_retweets: [ .[].retweet_count ] | add })'  jq_twitter.json

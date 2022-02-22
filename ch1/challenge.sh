@@ -126,3 +126,8 @@ title 7
 #   - group_by users
 #   - sum(?) retweet_count
 jq -s 'group_by(.user) | map({ user_id: .[0].user.id, total_retweets: [ .[].retweet_count ] | add })'  jq_twitter.json
+
+title if
+
+# simple example of using if then else. Note to use in object, you must include the brackets
+jq '{ thunum: (if . == 0 then "zero" elif . == 1 then "one" else "many" end) }' <<< "1"
